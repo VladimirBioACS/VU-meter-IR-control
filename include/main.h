@@ -40,7 +40,8 @@
 #define AVR_WDT_ENABLE                        (STD_ON)
 
 #define POTENTIOMETER_LOW_BOUNDRY         (uint8_t)(1)
-#define POTENTIOMETER_HIGH_BOUNDRY       (uint8_t)(30)
+#define POTENTIOMETER_HIGH_BOUNDRY       (uint8_t)(30) 
+#define DELAY_PERIOD                   (uint16_t)(500)
 
 /*Parameters to be stored in the EEPROM memory*/
 struct ChannelsConfiguration
@@ -68,8 +69,9 @@ enum channelsState
 /*********************************************************************************************************************/
 
 static void storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
+static void getEepromConfig(void);
 static void potentiometerChannelSelect(int option);
-static void irDataReceive();
+static void irDataReceive(void);
 
 #if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
 static void irReceiveCmdInfo();

@@ -56,6 +56,12 @@
 #endif
 
 /*********************************************************************************************************************/
+/*------------------------------------------------------Variables----------------------------------------------------*/
+/*********************************************************************************************************************/
+
+unsigned long tim_value_now;
+
+/*********************************************************************************************************************/
 /*------------------------------------------------------Classes------------------------------------------------------*/
 /*********************************************************************************************************************/
 
@@ -69,7 +75,7 @@ EEPROMStore<ChannelsConfiguration> Configuration;
 
 /**
 * @brief Function implements the received IR data parsing. Mainly used for the debug
-* @param argument: Not used
+* @param argument: None
 * @retval None
 */
 #if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
@@ -141,8 +147,10 @@ static void potentiometerChannelSelect(int option)
 * @param argument: None
 * @retval None
 */
-static void irDataReceive()
+static void irDataReceive(void)
 {
+  static uint8_t potentiometer_val = 1;   /* just for test */
+
   if(irreciver.decode())
   {
     if(irreciver.decodedIRData.protocol != UNKNOWN)
@@ -153,26 +161,42 @@ static void irDataReceive()
       {
       case SELECT_RIGHT_CHANNEL_CMD_RAW:
         DEBUG_NL("[CMD received]: Right channel selected");
-        potentiometerChannelSelect(1);
+        potentiometerChannelSelect(RIGHT_CHANNEL_SELECT);
         break;
       
       case SELECT_LEFT_CHANNEL_CMD_RAW:
         DEBUG_NL("[CMD received]: Left channel selected");
-        potentiometerChannelSelect(0);
+        potentiometerChannelSelect(LEFT_CHANNEL_SELECT);
         break;
 
       case COMMIT_CHANGES_CMD_RAW:
         DEBUG_NL("[CMD received]: Changes commited");
-        potentiometerChannelSelect(2);
+        potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
         break;
 
       case INCREASE_POTENTIOMETER_VAL_CMD_RAW:
         DEBUG_NL("[CMD received]: value UP");
+
+        if(potentiometer_val < POTENTIOMETER_HIGH_BOUNDRY )
+        {
+          ++potentiometer_val;    /* just for test */
+        }
+
+        DEBUG_NL(potentiometer_val);
+
         break;
 
       case DECREASE_POTENTIOMETER_VAL_CMD_RAW:
         DEBUG_NL("[CMD received]: value DOWN");
-        break;
+
+        if(potentiometer_val > POTENTIOMETER_LOW_BOUNDRY)
+        {
+          --potentiometer_val;    /* just for test */
+        }
+
+        DEBUG_NL(potentiometer_val);
+        
+        break; 
 
       default:
         DEBUG_NL("[CMD received]: Unknown command");
@@ -184,7 +208,6 @@ static void irDataReceive()
     {
       DEBUG_NL("Unknown protocol");
     }
-
   }
 
   irreciver.resume();
@@ -197,19 +220,24 @@ static void irDataReceive()
 */
 void setup() 
 {
+  /* WDG initialization */
   #if (AVR_WDT_ENABLE == STD_ON)
-    wdt_enable(WDTO_4S);               // WDTO_4S => 4 second timeout.
+    wdt_enable(WDTO_4S);               /* WDTO_4S => 4 second timeout. */
   #endif
 
   DEBUG_SETUP(BAUDRATE);
 
+  /* GPIO initialization */
   pinMode(LEFT_CHANNEL, OUTPUT);
   pinMode(RIGHT_CHANNEL, OUTPUT);
-
   potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
 
+  /* External devices initialization */
   irreciver.enableIRIn();
   potentiometer.potentiometerInit();
+
+  /* Timer value store */
+  tim_value_now = millis();
 
   DEBUG_NL("==== System inited ====");
 
@@ -222,15 +250,18 @@ void setup()
 */
 void loop() 
 {
-  #if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
-  irReceiveCmdInfo();
-  #endif
+  /* Main loop */
+  if(millis() >= tim_value_now + DELAY_PERIOD)     /* Timer for non-blocking delay */
+  {
+    #if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
+      irReceiveCmdInfo();
+    #else
+      irDataReceive();
+    #endif
+  }
 
-  irDataReceive();
-  
-  #if (AVR_WDT_ENABLE == STD_ON)
+/* WDG pet */
+#if (AVR_WDT_ENABLE == STD_ON)
     wdt_reset();
-  #endif
-
-  delay(500);
+#endif
 }
