@@ -150,7 +150,6 @@ static void potentiometerChannelSelect(int option)
 */
 static void irDataReceive(void)
 {
-
   static uint8_t right_channel_value = Configuration.Data.channel_right_resistance_value; 
   static uint8_t left_channel_value = Configuration.Data.channel_left_resistance_value; 
 
@@ -226,54 +225,122 @@ static void irDataReceive(void)
       case INCREASE_POTENTIOMETER_VAL_CMD_RAW:
         DEBUG_NL("[CMD received]: value UP");
 
-        if(left_channel_value < POTENTIOMETER_HIGH_BOUNDRY && right_channel_value < POTENTIOMETER_HIGH_BOUNDRY)
+        if(left_channel_select_f)
         {
-          if(left_channel_select_f)
+          ++left_channel_value;
+          
+          if(left_channel_value <= POTENTIOMETER_HIGH_BOUNDRY)
           {
-            ++left_channel_value;
             potentiometer.potentiometerSetVal(left_channel_value);
-
             DEBUG_NL(left_channel_value);
           }
-          if(right_channel_select_f)
-          {
-            ++right_channel_value;
-            potentiometer.potentiometerSetVal(right_channel_value);
-
-            DEBUG_NL(right_channel_value);
-          }    
           else
           {
-            // empty
+            left_channel_value = POTENTIOMETER_HIGH_BOUNDRY;
           }
         }
+
+        if(right_channel_select_f)
+        {
+          ++right_channel_value;
+          
+          if(right_channel_value <= POTENTIOMETER_HIGH_BOUNDRY)
+          {
+            potentiometer.potentiometerSetVal(right_channel_value);
+            DEBUG_NL(right_channel_value);
+          }
+          else
+          {
+            right_channel_value = POTENTIOMETER_HIGH_BOUNDRY;
+          }
+        }
+        else
+        {
+          // empty
+        }
+
+        // if(left_channel_value < POTENTIOMETER_HIGH_BOUNDRY && right_channel_value < POTENTIOMETER_HIGH_BOUNDRY)
+        // {
+        //   if(left_channel_select_f)
+        //   {
+        //     ++left_channel_value;
+        //     potentiometer.potentiometerSetVal(left_channel_value);
+
+        //     DEBUG_NL(left_channel_value);
+        //   }
+        //   if(right_channel_select_f)
+        //   {
+        //     ++right_channel_value;
+        //     potentiometer.potentiometerSetVal(right_channel_value);
+
+        //     DEBUG_NL(right_channel_value);
+        //   }    
+        //   else
+        //   {
+        //     // empty
+        //   }
+        // }
 
         break;
 
       case DECREASE_POTENTIOMETER_VAL_CMD_RAW:
         DEBUG_NL("[CMD received]: value DOWN");
 
-        if(left_channel_value > POTENTIOMETER_LOW_BOUNDRY && right_channel_value > POTENTIOMETER_LOW_BOUNDRY)
+        if(left_channel_select_f)
         {
-          if(left_channel_select_f)
+          --left_channel_value;
+          
+          if(left_channel_value >= POTENTIOMETER_LOW_BOUNDRY)
           {
-            --left_channel_value;
             potentiometer.potentiometerSetVal(left_channel_value);
-
             DEBUG_NL(left_channel_value);
           }
-          if(right_channel_select_f)
-          {
-            --right_channel_value;
-            potentiometer.potentiometerSetVal(right_channel_value);
-
-            DEBUG_NL(right_channel_value);
-          }   
           else
           {
-            // empty
+            left_channel_value = POTENTIOMETER_LOW_BOUNDRY;
           }
         }
+
+        if(right_channel_select_f)
+        {
+          --right_channel_value;
+          
+          if(right_channel_value >= POTENTIOMETER_LOW_BOUNDRY)
+          {
+            potentiometer.potentiometerSetVal(right_channel_value);
+            DEBUG_NL(right_channel_value);
+          }
+          else
+          {
+            right_channel_value = POTENTIOMETER_LOW_BOUNDRY;
+          }
+        }
+        else
+        {
+          // empty
+        }
+
+        // if(left_channel_value > POTENTIOMETER_LOW_BOUNDRY && right_channel_value > POTENTIOMETER_LOW_BOUNDRY)
+        // {
+        //   if(left_channel_select_f)
+        //   {
+        //     --left_channel_value;
+        //     potentiometer.potentiometerSetVal(left_channel_value);
+
+        //     DEBUG_NL(left_channel_value);
+        //   }
+        //   if(right_channel_select_f)
+        //   {
+        //     --right_channel_value;
+        //     potentiometer.potentiometerSetVal(right_channel_value);
+
+        //     DEBUG_NL(right_channel_value);
+        //   }   
+        //   else
+        //   {
+        //     // empty
+        //   }
+        // }
         
         break; 
 
