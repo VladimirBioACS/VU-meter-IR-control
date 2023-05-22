@@ -40,11 +40,28 @@
 /*********************************************************************************************************************/
 
 /* Serial log setup*/
-#if(DEBUG_PRINTER == STD_ON)
+#if(DEBUG_PRINTER == STD_ON && SOFTWARE_SERIAL_DEBUG == STD_OFF)
 
   #define DEBUG_SETUP(baudrate)     Serial.begin(baudrate)
   #define DEBUG(string)             Serial.print(string)
   #define DEBUG_NL(string_nln)      Serial.println(string_nln)
+
+  #pragma message ("Hardware serial debug enabled")
+
+#elif(DEBUG_PRINTER == STD_ON && SOFTWARE_SERIAL_DEBUG == STD_ON)
+
+  #include "SoftwareSerial.h"
+
+  #define DEBUG_RX                  uint8_t(3)
+  #define DEBUG_TX                  uint8_t(4)
+
+  SoftwareSerial softSerial(DEBUG_RX, DEBUG_TX);
+
+  #define DEBUG_SETUP(baudrate)     softSerial.begin(baudrate)
+  #define DEBUG(string)             softSerial.print(string)
+  #define DEBUG_NL(string_nln)      softSerial.println(string_nln)
+
+  #pragma message ("Software serial debug enabled")
 
 #else
 
@@ -217,7 +234,7 @@ static void irDataReceive(void)
         }
         else
         {
-          DEBUG_NL("Some error occured during EEPROM write or data did not changed");
+          DEBUG_NL("EEPROM data did not changed");
         }
 
         break;
@@ -259,28 +276,6 @@ static void irDataReceive(void)
           // empty
         }
 
-        // if(left_channel_value < POTENTIOMETER_HIGH_BOUNDRY && right_channel_value < POTENTIOMETER_HIGH_BOUNDRY)
-        // {
-        //   if(left_channel_select_f)
-        //   {
-        //     ++left_channel_value;
-        //     potentiometer.potentiometerSetVal(left_channel_value);
-
-        //     DEBUG_NL(left_channel_value);
-        //   }
-        //   if(right_channel_select_f)
-        //   {
-        //     ++right_channel_value;
-        //     potentiometer.potentiometerSetVal(right_channel_value);
-
-        //     DEBUG_NL(right_channel_value);
-        //   }    
-        //   else
-        //   {
-        //     // empty
-        //   }
-        // }
-
         break;
 
       case DECREASE_POTENTIOMETER_VAL_CMD_RAW:
@@ -319,29 +314,7 @@ static void irDataReceive(void)
         {
           // empty
         }
-
-        // if(left_channel_value > POTENTIOMETER_LOW_BOUNDRY && right_channel_value > POTENTIOMETER_LOW_BOUNDRY)
-        // {
-        //   if(left_channel_select_f)
-        //   {
-        //     --left_channel_value;
-        //     potentiometer.potentiometerSetVal(left_channel_value);
-
-        //     DEBUG_NL(left_channel_value);
-        //   }
-        //   if(right_channel_select_f)
-        //   {
-        //     --right_channel_value;
-        //     potentiometer.potentiometerSetVal(right_channel_value);
-
-        //     DEBUG_NL(right_channel_value);
-        //   }   
-        //   else
-        //   {
-        //     // empty
-        //   }
-        // }
-        
+   
         break; 
 
       default:
@@ -381,6 +354,16 @@ void setup()
   /* External devices initialization */
   irreciver.enableIRIn();
   potentiometer.potentiometerInit();
+
+  #if(INIT_POTENTIOMETERS_WITH_EEPROM_VAL == STD_ON)
+    potentiometerChannelSelect(LEFT_CHANNEL_SELECT);
+    potentiometer.potentiometerSetVal(Configuration.Data.channel_left_resistance_value);
+
+    potentiometerChannelSelect(RIGHT_CHANNEL_SELECT);
+    potentiometer.potentiometerSetVal(Configuration.Data.channel_right_resistance_value);
+
+    potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
+  #endif
 
   /* Timer value store */
   tim_value_now = millis();
