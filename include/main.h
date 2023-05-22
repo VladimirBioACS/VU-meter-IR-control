@@ -68,8 +68,7 @@ enum channelsState
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
 
-static void storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
-static void getEepromConfig(void);
+static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
 static void potentiometerChannelSelect(int option);
 static void irDataReceive(void);
 
