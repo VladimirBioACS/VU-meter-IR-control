@@ -1,5 +1,13 @@
 #include "X9C102_potentiometer.h"
 
+
+X9C102_potentiometer::X9C102_potentiometer(uint8_t UD, uint8_t INC)
+{
+    _UD  =  UD;
+    _INC =  INC;
+}
+
+
 void X9C102_potentiometer::resetValue()
 {
     for (size_t i = 0; i < POTENTIOMETER_RESOLUTION; i++)
@@ -24,13 +32,6 @@ void X9C102_potentiometer::setValue(uint8_t val)
 }
 
 
-X9C102_potentiometer::X9C102_potentiometer(uint8_t UD, uint8_t INC)
-{
-    _UD  =  UD;
-    _INC =  INC;
-}
-
-
 void X9C102_potentiometer::potentiometerInit()
 {
     pinMode(_UD,  0x1);
@@ -38,11 +39,25 @@ void X9C102_potentiometer::potentiometerInit()
 }
 
 
-void X9C102_potentiometer::potentiometerSetVal(uint8_t val)
+void X9C102_potentiometer::potentiometerSetVal(uint8_t val, uint8_t dir)
 {
-    // digitalWrite(_CS, 0x0);
-    // digitalWrite(_UD, 0x0);
-    // resetValue();
-    digitalWrite(_UD, 0x1);
+    switch (dir)
+    {
+    case DIRECTION_UP:              /* for right channel*/
+        digitalWrite(_UD, 0x0);
+        resetValue();
+        digitalWrite(_UD, 0x1);
+        break;
+
+    case DIRECTION_DOWN:            /* for left channel*/
+        digitalWrite(_UD, 0x1);
+        resetValue();
+        digitalWrite(_UD, 0x0);
+        break;
+    
+    default:
+        break;
+    }
+
     setValue(val);
 }

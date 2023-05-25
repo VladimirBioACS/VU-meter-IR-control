@@ -9,19 +9,21 @@
 #define INCREASE_POTENTIOMETER_VAL_CMD_ADDR            (uint16_t)(0x0)
 #define DECREASE_POTENTIOMETER_VAL_CMD_ADDR            (uint16_t)(0x0)
 #define COMMIT_CHANGES_CMD_ADDR                        (uint16_t)(0x0)
-
+#define PRINT_DEBUG_INFO_CMD_ADDR                      (uint16_t)(0x0)
 /*CMD value*/
-#define SELECT_RIGHT_CHANNEL_CMD_C                      (uint16_t)(0x46)
-#define SELECT_LEFT_CHANNEL_CMD_C                       (uint16_t)(0x45)
-#define INCREASE_POTENTIOMETER_VAL_CMD_C                (uint16_t)(0x18)
-#define DECREASE_POTENTIOMETER_VAL_CMD_C                (uint16_t)(0x52)
-#define COMMIT_CHANGES_CMD_C                            (uint16_t)(0x1C)
+#define SELECT_RIGHT_CHANNEL_CMD_C                     (uint16_t)(0x46)
+#define SELECT_LEFT_CHANNEL_CMD_C                      (uint16_t)(0x45)
+#define INCREASE_POTENTIOMETER_VAL_CMD_C               (uint16_t)(0x18)
+#define DECREASE_POTENTIOMETER_VAL_CMD_C               (uint16_t)(0x52)
+#define COMMIT_CHANGES_CMD_C                           (uint16_t)(0x1C)
+#define PRINT_DEBUG_INFO_CMD_C                         (uint16_t)()
 
 /*Raw data value*/
-#define SELECT_RIGHT_CHANNEL_CMD_RAW                    (uint32_t)(0xB946FF00)
-#define SELECT_LEFT_CHANNEL_CMD_RAW                     (uint32_t)(0xBA45FF00)
-#define INCREASE_POTENTIOMETER_VAL_CMD_RAW              (uint32_t)(0xE718FF00)
-#define DECREASE_POTENTIOMETER_VAL_CMD_RAW              (uint32_t)(0xAD52FF00)
-#define COMMIT_CHANGES_CMD_RAW                          (uint32_t)(0xE31CFF00)
+#define SELECT_RIGHT_CHANNEL_CMD_RAW                   (uint32_t)(0xB946FF00)
+#define SELECT_LEFT_CHANNEL_CMD_RAW                    (uint32_t)(0xBA45FF00)
+#define INCREASE_POTENTIOMETER_VAL_CMD_RAW             (uint32_t)(0xE718FF00)
+#define DECREASE_POTENTIOMETER_VAL_CMD_RAW             (uint32_t)(0xAD52FF00)
+#define COMMIT_CHANGES_CMD_RAW                         (uint32_t)(0xE31CFF00)
+#define PRINT_DEBUG_INFO_CMD_RAW                       (uint32_t)(0xF20DFF00)
 
 #endif

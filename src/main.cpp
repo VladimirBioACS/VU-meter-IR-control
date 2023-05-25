@@ -24,16 +24,22 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
+
 #include <Arduino.h>
 #include "EEPROMStore.h"
-#include "main.h"
 #include "X9C102_potentiometer.h"
 #include "IRremote.h"
 #include "protocol.h"
 
+#if(DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
+#include "platform.h"
+#endif
+
 #if (AVR_WDT_ENABLE == STD_ON)
   #include "avr\wdt.h"
 #endif
+
+#include "main.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -51,9 +57,6 @@
 #elif(DEBUG_PRINTER == STD_ON && SOFTWARE_SERIAL_DEBUG == STD_ON)
 
   #include "SoftwareSerial.h"
-
-  #define DEBUG_RX                  uint8_t(3)
-  #define DEBUG_TX                  uint8_t(4)
 
   SoftwareSerial softSerial(DEBUG_RX, DEBUG_TX);
 
@@ -84,18 +87,84 @@ unsigned long tim_value_now;
 
 IRrecv irreciver (RECEIVER_GPIO);
 X9C102_potentiometer potentiometer(UD_POTENTIOMETER_GPIO, INC_POTENTIOMETER_GPIO);
+
 EEPROMStore<ChannelsConfiguration> Configuration;
 
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
 
+#if(DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
+static void showSystemInfo(void)
+{
+
+  DEBUG_NL("=====PLATFORM INFO START=====");
+
+  DEBUG("[MCU]: ");
+  DEBUG_NL(MCU);
+
+  DEBUG("[FIRMWARE VERSION]: ");
+  DEBUG_NL(FIRMWARE_VERSION);
+
+  DEBUG("[DEVICE DESCRIPTION]: ");
+  DEBUG_NL(DEVICE_DESCRIPTION);
+
+  DEBUG("[EEPROM VOLUME]: ");
+  DEBUG(EEPROM_VOLUME);
+  DEBUG_NL(" bytes");
+
+  DEBUG("[FLASH VOLUME]: ");
+  DEBUG(FLASH_VOLUME);
+  DEBUG_NL(" bytes");
+
+  DEBUG("[RAM VOLUME]: ");
+  DEBUG(RAM_VOLUME);
+  DEBUG_NL(" bytes");
+
+  DEBUG("[POTENTIOMETER MAX RESISTANCE]: ");
+  DEBUG(MAX_RESISTANCE);
+  DEBUG_NL(" KOhm");
+
+  DEBUG("[POTENTIOMETER MIN RESISTANCE]: ");
+  DEBUG(MIN_RESISTANCE);
+  DEBUG_NL(" KOhm");
+
+  #if(AVR_WDT_ENABLE == STD_ON)
+    DEBUG_NL("[OPTION]: Watchdog timer: [ENABLED]");
+    DEBUG("[OPTION]: Watchdog config: ");
+    DEBUG_NL(WDT_TRIGGER_TIME);
+  #endif
+
+  #if(DEBUG_PRINTER == STD_ON)
+    DEBUG_NL("[OPTION]: USB Debug printer: [ENABLED]");
+  #endif
+
+  #if(SOFTWARE_SERIAL_DEBUG == STD_ON)
+    DEBUG_NL("[OPTION]: Software serial Debug printer: [ENABLED]");
+  #endif
+
+  #if(INIT_POTENTIOMETERS_WITH_EEPROM_VAL == STD_ON)
+    DEBUG_NL("[OPTION]: Potentiometer initialization from EEPROM: [ENABLED]");
+
+    DEBUG("[OPTION]: Current EEPROM value for Left channel: ");
+    DEBUG_NL(Configuration.Data.channel_left_resistance_value);
+
+    DEBUG("[OPTION]: Current EEPROM value for Right channel: ");
+    DEBUG_NL(Configuration.Data.channel_right_resistance_value);
+  #endif
+    
+  DEBUG_NL("=====PLATFORM INFO START=====");
+  DEBUG_NL("");
+}
+
+#endif
+
+#if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
 /**
 * @brief Function implements the received IR data parsing. Mainly used for the debug
 * @param argument: None
 * @retval None
 */
-#if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
 static void irReceiveCmdInfo()
 {
   if(irreciver.decode())
@@ -115,6 +184,7 @@ static void irReceiveCmdInfo()
 }
 #endif
 
+
 /**
 * @brief Function implements the EEPROM config storage and returns status after EEPROM write
 * @param argument: uint8_t left_channel_value, uint8_t right_channel_value
@@ -125,10 +195,21 @@ static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_
   Configuration.Data.channel_left_resistance_value = left_channel_value;
   Configuration.Data.channel_right_resistance_value = right_channel_value;
 
+  /* test EEPROM write operation duration with test GPIO*/
+  #if(ENABLE_TEST_MODE == STD_ON)
+    digitalWrite(TEST_GPIO, 0x1);
+  #endif    
+
   bool eeprom_status_f = Configuration.Save();
+
+  /* test EEPROM write operation duration with test GPIO*/
+  #if(ENABLE_TEST_MODE == STD_ON)
+    digitalWrite(TEST_GPIO, 0x0);
+  #endif    
   
   return eeprom_status_f;
 }
+
 
 /**
 * @brief Function implements the selection mechanism for left and right channel potentiometers
@@ -143,22 +224,30 @@ static void potentiometerChannelSelect(int option)
 
     digitalWrite(LEFT_CHANNEL, CHANNEL_SELECTED);
     digitalWrite(RIGHT_CHANNEL, CHANNEL_UNSELECTED);
+
     break;
   
   case RIGHT_CHANNEL_SELECT:
     digitalWrite(LEFT_CHANNEL, CHANNEL_UNSELECTED);
     digitalWrite(RIGHT_CHANNEL, CHANNEL_SELECTED);
+
     break;
 
   case RELEASE_CHANNELS_CS_LINES:       /*release the potentiometer CS line to avoid sporadic value change*/
     digitalWrite(LEFT_CHANNEL, CHANNEL_UNSELECTED);
     digitalWrite(RIGHT_CHANNEL, CHANNEL_UNSELECTED);
+  
     break;
+
+  case SELECT_ALL_CS_CHANNELS:
+    digitalWrite(LEFT_CHANNEL, CHANNEL_SELECTED);
+    digitalWrite(RIGHT_CHANNEL, CHANNEL_SELECTED);
 
   default:
     break;
   }
 }
+
 
 /**
 * @brief Function implements the reception of the IR CMD and contains its processing logic
@@ -170,7 +259,18 @@ static void irDataReceive(void)
   static uint8_t right_channel_value = Configuration.Data.channel_right_resistance_value; 
   static uint8_t left_channel_value = Configuration.Data.channel_left_resistance_value; 
 
-  static bool left_channel_select_f, right_channel_select_f = false;
+  static uint8_t channel_select_f = CHANNEL_SELECTION_IDLE_F;
+
+  /* should be tested */
+  if(right_channel_value < POTENTIOMETER_LOW_BOUNDRY)
+  {
+    right_channel_value = POTENTIOMETER_LOW_BOUNDRY;
+  }
+
+  if(left_channel_value < POTENTIOMETER_LOW_BOUNDRY)
+  {
+    left_channel_value = POTENTIOMETER_LOW_BOUNDRY;
+  }
 
   if(irreciver.decode())
   {
@@ -183,9 +283,7 @@ static void irDataReceive(void)
       case SELECT_RIGHT_CHANNEL_CMD_RAW:
         DEBUG_NL("[CMD received]: Right channel selected");
 
-        right_channel_select_f = true;
-        left_channel_select_f = false;
-
+        channel_select_f = RIGHT_CHANNEL_SELECT_F;
         potentiometerChannelSelect(RIGHT_CHANNEL_SELECT);
 
         break;
@@ -193,9 +291,7 @@ static void irDataReceive(void)
       case SELECT_LEFT_CHANNEL_CMD_RAW:
         DEBUG_NL("[CMD received]: Left channel selected");
 
-        right_channel_select_f = false;
-        left_channel_select_f = true;
-
+        channel_select_f = LEFT_CHANNEL_SELECT_F;
         potentiometerChannelSelect(LEFT_CHANNEL_SELECT);
 
         break;
@@ -204,6 +300,7 @@ static void irDataReceive(void)
         DEBUG_NL("[CMD received]: Changes commited");
 
         potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
+        channel_select_f = CHANNEL_SELECTION_IDLE_F;
 
         DEBUG_NL("Stored values: ");
 
@@ -218,10 +315,6 @@ static void irDataReceive(void)
         if(storeEepromConfig(left_channel_value, right_channel_value))
         {
           DEBUG_NL("Configuration stored in eeprom");
-
-          right_channel_select_f = false;
-          left_channel_select_f = false;
-
           DEBUG_NL("EEPROM storage content: ");
 
           DEBUG("Right channel: ");
@@ -242,13 +335,13 @@ static void irDataReceive(void)
       case INCREASE_POTENTIOMETER_VAL_CMD_RAW:
         DEBUG_NL("[CMD received]: value UP");
 
-        if(left_channel_select_f)
+        if(channel_select_f == LEFT_CHANNEL_SELECT_F)
         {
           ++left_channel_value;
           
           if(left_channel_value <= POTENTIOMETER_HIGH_BOUNDRY)
           {
-            potentiometer.potentiometerSetVal(left_channel_value);
+            potentiometer.potentiometerSetVal(left_channel_value, DIRECTION_DOWN);
             DEBUG_NL(left_channel_value);
           }
           else
@@ -257,13 +350,13 @@ static void irDataReceive(void)
           }
         }
 
-        if(right_channel_select_f)
+        if(channel_select_f == RIGHT_CHANNEL_SELECT_F)
         {
           ++right_channel_value;
           
           if(right_channel_value <= POTENTIOMETER_HIGH_BOUNDRY)
           {
-            potentiometer.potentiometerSetVal(right_channel_value);
+            potentiometer.potentiometerSetVal(right_channel_value, DIRECTION_UP);
             DEBUG_NL(right_channel_value);
           }
           else
@@ -281,13 +374,13 @@ static void irDataReceive(void)
       case DECREASE_POTENTIOMETER_VAL_CMD_RAW:
         DEBUG_NL("[CMD received]: value DOWN");
 
-        if(left_channel_select_f)
+        if(channel_select_f == LEFT_CHANNEL_SELECT_F)
         {
           --left_channel_value;
           
           if(left_channel_value >= POTENTIOMETER_LOW_BOUNDRY)
           {
-            potentiometer.potentiometerSetVal(left_channel_value);
+            potentiometer.potentiometerSetVal(left_channel_value, DIRECTION_DOWN);
             DEBUG_NL(left_channel_value);
           }
           else
@@ -296,13 +389,13 @@ static void irDataReceive(void)
           }
         }
 
-        if(right_channel_select_f)
+        if(channel_select_f == RIGHT_CHANNEL_SELECT_F)
         {
           --right_channel_value;
           
           if(right_channel_value >= POTENTIOMETER_LOW_BOUNDRY)
           {
-            potentiometer.potentiometerSetVal(right_channel_value);
+            potentiometer.potentiometerSetVal(right_channel_value, DIRECTION_UP);
             DEBUG_NL(right_channel_value);
           }
           else
@@ -315,7 +408,14 @@ static void irDataReceive(void)
           // empty
         }
    
+      break;
+
+      /*Debug info*/
+      #if(DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
+      case PRINT_DEBUG_INFO_CMD_RAW:
+        showSystemInfo();
         break; 
+      #endif
 
       default:
         DEBUG_NL("[CMD received]: Unknown command");
@@ -341,34 +441,40 @@ void setup()
 {
   /* WDG initialization */
   #if (AVR_WDT_ENABLE == STD_ON)
-    wdt_enable(WDTO_4S);               /* WDTO_4S => 4 second timeout. */
+    wdt_enable(WDT_TRIGGER_TIME);               /* WDTO_4S => 4 second timeout. */
   #endif
 
   DEBUG_SETUP(BAUDRATE);
 
   /* GPIO initialization */
-  pinMode(LEFT_CHANNEL, OUTPUT);
-  pinMode(RIGHT_CHANNEL, OUTPUT);
-  potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
+  pinMode(LEFT_CHANNEL, OUTPUT);      
+  pinMode(RIGHT_CHANNEL, OUTPUT); 
 
+  /* test EEPROM write operation duration with test GPIO*/
+  #if(ENABLE_TEST_MODE == STD_ON)
+    pinMode(TEST_GPIO, OUTPUT);
+    digitalWrite(TEST_GPIO, 0x0);
+  #endif    
+  
   /* External devices initialization */
   irreciver.enableIRIn();
   potentiometer.potentiometerInit();
 
   #if(INIT_POTENTIOMETERS_WITH_EEPROM_VAL == STD_ON)
+
+
     potentiometerChannelSelect(LEFT_CHANNEL_SELECT);
-    potentiometer.potentiometerSetVal(Configuration.Data.channel_left_resistance_value);
+    potentiometer.potentiometerSetVal(Configuration.Data.channel_left_resistance_value, DIRECTION_DOWN);
 
     potentiometerChannelSelect(RIGHT_CHANNEL_SELECT);
-    potentiometer.potentiometerSetVal(Configuration.Data.channel_right_resistance_value);
-
-    potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
+    potentiometer.potentiometerSetVal(Configuration.Data.channel_right_resistance_value, DIRECTION_UP);
+    
   #endif
+
+  potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
 
   /* Timer value store */
   tim_value_now = millis();
-
-  DEBUG_NL("==== System inited ====");
 }
 
 /**
