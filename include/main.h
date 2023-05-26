@@ -43,20 +43,14 @@
 #define DEBUG_PRINTER                        (STD_ON)
 #define SOFTWARE_SERIAL_DEBUG                (STD_OFF)
 #define DEBUG_IR_FULL_INFO                   (STD_OFF)
-#define AVR_WDT_ENABLE                       (STD_ON)
+#define AVR_WDT_ENABLE                       (STD_OFF)
 #define INIT_POTENTIOMETERS_WITH_EEPROM_VAL  (STD_ON)
-
-#define ENABLE_TEST_MODE                     (STD_OFF)  /* test EEPROM write operation duration with test GPIO*/
-
-#if(ENABLE_TEST_MODE == STD_ON)
-#define TEST_GPIO                         (uint8_t)(2)  /* test EEPROM write operation duration with test GPIO*/
-#endif
 
 #define POTENTIOMETER_LOW_BOUNDRY         (uint8_t)(1)  /* 3 KOhm */
 #define POTENTIOMETER_HIGH_BOUNDRY       (uint8_t)(10)  /*30 KOhm with step of 3 KOhm*/
 
 #define POTETNIOMETER_RESET_VALUE         (uint8_t)(5)
-#define DELAY_PERIOD                   (uint16_t)(100)
+#define DELAY_PERIOD                       (int)(100)
 #define WDT_TRIGGER_TIME                      WDTO_4S
 
 /*Parameters to be stored in the EEPROM memory*/
@@ -94,6 +88,7 @@ enum channelSelectFlags
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
+
 static void potentiometerChannelSelect(int option);
 static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
 static void irDataReceive(void);
