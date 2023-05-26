@@ -43,7 +43,7 @@
 #define DEBUG_PRINTER                        (STD_ON)
 #define SOFTWARE_SERIAL_DEBUG                (STD_OFF)
 #define DEBUG_IR_FULL_INFO                   (STD_OFF)
-#define AVR_WDT_ENABLE                       (STD_OFF)
+#define AVR_WDT_ENABLE                       (STD_ON)
 #define INIT_POTENTIOMETERS_WITH_EEPROM_VAL  (STD_ON)
 
 #define POTENTIOMETER_LOW_BOUNDRY         (uint8_t)(1)  /* 3 KOhm */

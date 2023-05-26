@@ -37,7 +37,7 @@
 #endif
 
 #if (AVR_WDT_ENABLE == STD_ON)
-#include "avr\wdt.h"
+#include "avr/wdt.h"
 #endif
 
 #include "main.h"
