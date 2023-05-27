@@ -413,6 +413,42 @@ static void irDataReceive(void)
     }
   }
 
+/**
+ * EEPROM check task
+ * This task checks the EEPROM values every 5 minutes
+ * This task should re-write EEPROM with actual potentiometer values
+ * in case if EEPROM will not be updated by pressing "OK" button
+*/
+#if(EEPROM_CHECK_TASK_ENABLE == STD_ON)
+  static uint32_t old_time_eeprom_check_value = millis();
+
+  if ((millis() - old_time_eeprom_check_value) > DELAY_EEPROM_CHECK) /* Timer for non-blocking delay */
+  {
+    if (storeEepromConfig(left_channel_value, right_channel_value))
+    {
+      DEBUG_NL("EEPROM Check task");
+      DEBUG_NL("EEPROM stored");
+      DEBUG_NL("EEPROM storage content: ");
+
+      DEBUG("Right channel value: ");
+      DEBUG(Configuration.Data.channel_right_resistance_value);
+      DEBUG_NL("");
+
+      DEBUG("Left channel value: ");
+      DEBUG(Configuration.Data.channel_left_resistance_value);
+      DEBUG_NL("");
+    }
+
+    else
+    {
+      DEBUG_NL("EEPROM Check task");
+      DEBUG_NL("EEPROM data did not changed");
+    }
+
+    old_time_eeprom_check_value = millis();
+  }
+#endif
+
   irreciver.resume();
 }
 

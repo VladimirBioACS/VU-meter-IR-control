@@ -45,12 +45,14 @@
 #define DEBUG_IR_FULL_INFO                   (STD_OFF)
 #define AVR_WDT_ENABLE                       (STD_ON)
 #define INIT_POTENTIOMETERS_WITH_EEPROM_VAL  (STD_ON)
+#define EEPROM_CHECK_TASK_ENABLE             (STD_ON)
 
 #define POTENTIOMETER_LOW_BOUNDRY         (uint8_t)(1)  /* 3 KOhm */
 #define POTENTIOMETER_HIGH_BOUNDRY       (uint8_t)(10)  /*30 KOhm with step of 3 KOhm*/
 
 #define POTETNIOMETER_RESET_VALUE         (uint8_t)(5)
 #define DELAY_PERIOD                       (int)(100)
+#define DELAY_EEPROM_CHECK                 (1000UL * 60 * 5)  /* delay 5 minutes */
 #define WDT_TRIGGER_TIME                      WDTO_4S
 
 /*Parameters to be stored in the EEPROM memory*/
