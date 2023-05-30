@@ -23,40 +23,40 @@
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 
-#define BAUDRATE               (unsigned long)(115200)
+#define BAUDRATE                            (unsigned long)(115200)
 
-#define RECEIVER_GPIO                (uint_fast8_t)(8)
-#define LEFT_CHANNEL                      (uint8_t)(13)
-#define RIGHT_CHANNEL                     (uint8_t)(5)
-#define UD_POTENTIOMETER_GPIO             (uint8_t)(10)
-#define INC_POTENTIOMETER_GPIO            (uint8_t)(9)
+#define RECEIVER_GPIO                       (uint_fast8_t)(8)
+#define LEFT_CHANNEL                        (uint8_t)(13)
+#define RIGHT_CHANNEL                       (uint8_t)(5)
+#define UD_POTENTIOMETER_GPIO               (uint8_t)(10)
+#define INC_POTENTIOMETER_GPIO              (uint8_t)(9)
 
-#define DEBUG_RX                            uint8_t(7)  /* Software serial debugger GPIO RX pin*/
-#define DEBUG_TX                            uint8_t(6)  /* Software serial debugger GPIO TX pin*/
+#define DEBUG_RX                            (uint8_t)(7) /* Software serial debugger GPIO RX pin*/
+#define DEBUG_TX                            (uint8_t)(6) /* Software serial debugger GPIO TX pin*/
 
-#define CHANNEL_SELECTED                (uint8_t)(0x0)
-#define CHANNEL_UNSELECTED              (uint8_t)(0x1)
+#define CHANNEL_SELECTED                    (uint8_t)(0x0)
+#define CHANNEL_UNSELECTED                  (uint8_t)(0x1)
 
-#define STD_ON                                     (1)
-#define STD_OFF                                    (0)
+#define STD_ON                              (1)
+#define STD_OFF                             (0)
 
-#define DEBUG_PRINTER                        (STD_ON)
-#define SOFTWARE_SERIAL_DEBUG                (STD_OFF)
-#define DEBUG_IR_FULL_INFO                   (STD_OFF)
-#define AVR_WDT_ENABLE                       (STD_ON)
-#define INIT_POTENTIOMETERS_WITH_EEPROM_VAL  (STD_ON)
-#define EEPROM_CHECK_TASK_ENABLE             (STD_ON)
+#define DEBUG_PRINTER                       (STD_ON)
+#define SOFTWARE_SERIAL_DEBUG               (STD_OFF)
+#define DEBUG_IR_FULL_INFO                  (STD_OFF)
+#define AVR_WDT_ENABLE                      (STD_ON)
+#define INIT_POTENTIOMETERS_WITH_EEPROM_VAL (STD_ON)
+#define EEPROM_CHECK_TASK_ENABLE            (STD_ON)
 
-#define POTENTIOMETER_LOW_BOUNDRY         (uint8_t)(1)  /* 3 KOhm */
-#define POTENTIOMETER_HIGH_BOUNDRY       (uint8_t)(10)  /*30 KOhm with step of 3 KOhm*/
+#define POTENTIOMETER_LOW_BOUNDRY           (uint8_t)(1)   /* 3 KOhm */
+#define POTENTIOMETER_HIGH_BOUNDRY          (uint8_t)(10) /*30 KOhm with step of 3 KOhm*/
 
-#define POTETNIOMETER_RESET_VALUE         (uint8_t)(5)
-#define DELAY_PERIOD                       (int)(100)
-#define DELAY_EEPROM_CHECK                 (1000UL * 60 * 5)  /* delay 5 minutes */
-#define WDT_TRIGGER_TIME                      WDTO_4S
+#define POTETNIOMETER_RESET_VALUE           (uint8_t)(5)
+#define DELAY_PERIOD                        (int)(100)
+#define DELAY_EEPROM_CHECK                  (1000UL * 60 * 5) /* delay 5 minutes */
+#define WDT_TRIGGER_TIME                    WDTO_4S
+
 
 /*Parameters to be stored in the EEPROM memory*/
-
 struct ChannelsConfiguration
 {
   uint8_t channel_left_resistance_value;
@@ -69,22 +69,21 @@ struct ChannelsConfiguration
   }
 };
 
-
 /*enumeration for potentiometers CS line selection*/
 enum channelsState
 {
-    LEFT_CHANNEL_SELECT,
-    RIGHT_CHANNEL_SELECT,
-    RELEASE_CHANNELS_CS_LINES,
-    SELECT_ALL_CS_CHANNELS
+  LEFT_CHANNEL_SELECT,
+  RIGHT_CHANNEL_SELECT,
+  RELEASE_CHANNELS_CS_LINES,
+  SELECT_ALL_CS_CHANNELS
 };
 
 /*enumeration for channel selection flags*/
 enum channelSelectFlags
 {
-    LEFT_CHANNEL_SELECT_F     = 1 << 0,
-    RIGHT_CHANNEL_SELECT_F    = 1 << 1,
-    CHANNEL_SELECTION_IDLE_F  = 1 << 2
+  LEFT_CHANNEL_SELECT_F = 1 << 0,
+  RIGHT_CHANNEL_SELECT_F = 1 << 1,
+  CHANNEL_SELECTION_IDLE_F = 1 << 2
 };
 
 /*********************************************************************************************************************/
@@ -95,7 +94,7 @@ static void potentiometerChannelSelect(int option);
 static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
 static void irDataReceive(void);
 
-#if(DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
+#if (DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
 static void showSystemInfo(void);
 #endif
 
@@ -104,4 +103,3 @@ static void irReceiveCmdInfo();
 #endif
 
 #endif
-
