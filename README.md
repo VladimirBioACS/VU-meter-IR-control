@@ -22,3 +22,13 @@ The picture below shows top-level system architecture:
 The picture below shows 3D model of the VU-meter device
 
 ![3D diagram](VU_meter_3D_model.png)
+
+## Project structure
+
+Root folder contains platformio.ini configuration and additional (README.md, pictures, etc) files.
+Folder structure:
+- src: contains project source files;
+- inc: contains project header files;
+- lib: contains project specific (private) libraries;
+- test: contains unit tests;
+- PCB_designb: contains HW related files (schematic; gerbers and EasyEDA project)
