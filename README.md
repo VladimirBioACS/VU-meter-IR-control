@@ -27,9 +27,10 @@ The picture below shows 3D model of the VU-meter device
 
 Root folder contains platformio.ini configuration and additional (README.md, pictures, etc) files.
 Folder structure:
-- src: contains project source files;
-- inc: contains project header files;
-- lib: contains project specific (private) libraries;
-- test: contains unit tests;
-- PCB_designb: contains HW related files (schematic; gerbers and EasyEDA project);
-- .vscode: contains VS Code config
+- **src**: contains project source files;
+- **inc**: contains project header files;
+- **lib**: contains project specific (private) libraries;
+- **test**: contains unit tests;
+- **PCB_designb**: contains HW related files (schematic; gerbers and EasyEDA project);
+- **.vscode**: contains VS Code config;
+- **Profiler_application**: contains the profiler application flow for the Node-RED.
