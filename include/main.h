@@ -56,10 +56,6 @@
 #define DELAY_EEPROM_CHECK                  (1000UL * 60 * 5) /* delay 5 minutes */
 #define WDT_TRIGGER_TIME                    WDTO_4S
 
-#define POTETNIOMETER_RESET_VALUE         (uint8_t)(5)
-#define DELAY_PERIOD                       (int)(100)
-#define DELAY_EEPROM_CHECK                 (1000UL * 60 * 5)  /* delay 5 minutes */
-#define WDT_TRIGGER_TIME                      WDTO_4S
 
 /*Parameters to be stored in the EEPROM memory*/
 
