@@ -86,6 +86,22 @@ X9C102_potentiometer potentiometer(UD_POTENTIOMETER_GPIO, INC_POTENTIOMETER_GPIO
 EEPROMStore<ChannelsConfiguration> Configuration;
 
 /*********************************************************************************************************************/
+/*------------------------------------------------Function Prototypes------------------------------------------------*/
+/*********************************************************************************************************************/
+
+static void potentiometerChannelSelect(int option);
+static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
+static void irDataReceive(void);
+
+#if(DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
+static void showSystemInfo(void);
+#endif
+
+#if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
+static void irReceiveCmdInfo();
+#endif
+
+/*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
 
@@ -484,7 +500,6 @@ void setup()
 #endif
 
   potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
-  pinMode(12, OUTPUT);
 }
 
 /**

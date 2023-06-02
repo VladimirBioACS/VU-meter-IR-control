@@ -51,12 +51,11 @@
 #define POTENTIOMETER_HIGH_BOUNDRY       (uint8_t)(10)  /*30 KOhm with step of 3 KOhm*/
 
 #define POTETNIOMETER_RESET_VALUE         (uint8_t)(5)
-#define DELAY_PERIOD                       (int)(100)
-#define DELAY_EEPROM_CHECK                 (1000UL * 60 * 5)  /* delay 5 minutes */
-#define WDT_TRIGGER_TIME                      WDTO_4S
+#define DELAY_PERIOD                        (int)(100)
+#define DELAY_EEPROM_CHECK           (1000UL * 60 * 5)  /* delay 2 minutes */
+#define WDT_TRIGGER_TIME                       WDTO_4S
 
-/*Parameters to be stored in the EEPROM memory*/
-
+/* Parameters to be stored in the EEPROM memory */
 struct ChannelsConfiguration
 {
   uint8_t channel_left_resistance_value;
@@ -70,7 +69,7 @@ struct ChannelsConfiguration
 };
 
 
-/*enumeration for potentiometers CS line selection*/
+/* Enumeration for potentiometers CS line selection */
 enum channelsState
 {
     LEFT_CHANNEL_SELECT,
@@ -86,22 +85,6 @@ enum channelSelectFlags
     RIGHT_CHANNEL_SELECT_F    = 1 << 1,
     CHANNEL_SELECTION_IDLE_F  = 1 << 2
 };
-
-/*********************************************************************************************************************/
-/*------------------------------------------------Function Prototypes------------------------------------------------*/
-/*********************************************************************************************************************/
-
-static void potentiometerChannelSelect(int option);
-static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value);
-static void irDataReceive(void);
-
-#if(DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
-static void showSystemInfo(void);
-#endif
-
-#if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
-static void irReceiveCmdInfo();
-#endif
 
 #endif
 
