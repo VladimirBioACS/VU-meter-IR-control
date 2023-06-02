@@ -1,0 +1,919 @@
+[
+    {
+        "id": "ac66284f6b831c50",
+        "type": "subflow",
+        "name": "UART Interface",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 640,
+                "y": 580,
+                "wires": [
+                    {
+                        "id": "215b1bd6a9d1b2ac"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1260,
+                "y": 500,
+                "wires": [
+                    {
+                        "id": "a0e971d5c5d5a614",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1260,
+                "y": 540,
+                "wires": [
+                    {
+                        "id": "485b0d58c97fda06",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1260,
+                "y": 580,
+                "wires": [
+                    {
+                        "id": "42d15ccbdfec3a4c",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "8c55d0fd13698089",
+        "type": "comment",
+        "z": "ac66284f6b831c50",
+        "name": "uart_status_port (output) ->",
+        "info": "",
+        "x": 1410,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "91214309a14eddd0",
+        "type": "comment",
+        "z": "ac66284f6b831c50",
+        "name": "uart_exception_port (output) ->",
+        "info": "",
+        "x": 1430,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "6d74655b83f0dd25",
+        "type": "comment",
+        "z": "ac66284f6b831c50",
+        "name": "uart_data_port (output) ->",
+        "info": "",
+        "x": 1410,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "d026d255c27d691e",
+        "type": "comment",
+        "z": "ac66284f6b831c50",
+        "name": "-> uart_data_port (input) ",
+        "info": "",
+        "x": 490,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "215b1bd6a9d1b2ac",
+        "type": "serial out",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "SYSTEM UART IN",
+        "serial": "290cf16cc8a25136",
+        "x": 810,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "42d15ccbdfec3a4c",
+        "type": "serial in",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "SYSTEM UART OUT",
+        "serial": "290cf16cc8a25136",
+        "x": 1080,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "07dd6c812cadf05f",
+        "type": "catch",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "UART exception",
+        "scope": [
+            "215b1bd6a9d1b2ac",
+            "42d15ccbdfec3a4c"
+        ],
+        "uncaught": false,
+        "x": 800,
+        "y": 540,
+        "wires": [
+            [
+                "a7ebfa0cec1e73da"
+            ]
+        ]
+    },
+    {
+        "id": "2928c88cac7b2c87",
+        "type": "status",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "UART_status",
+        "scope": [
+            "215b1bd6a9d1b2ac"
+        ],
+        "x": 790,
+        "y": 500,
+        "wires": [
+            [
+                "3e5cc5a6420632de"
+            ]
+        ]
+    },
+    {
+        "id": "3e5cc5a6420632de",
+        "type": "function",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "StatusToJson()",
+        "func": "var status;\n\nstatus = '{\"uart_status\": \"' + msg.status.text + '\"}';\nmsg.payload = status;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 500,
+        "wires": [
+            [
+                "a0e971d5c5d5a614"
+            ]
+        ]
+    },
+    {
+        "id": "a0e971d5c5d5a614",
+        "type": "json",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 1130,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a7ebfa0cec1e73da",
+        "type": "function",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "ExcToJson()",
+        "func": "var exception;\n\nexception = '{\"uart_exception\": \"' + msg.error.message + '\"}';\nmsg.payload = exception;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 540,
+        "wires": [
+            [
+                "485b0d58c97fda06"
+            ]
+        ]
+    },
+    {
+        "id": "485b0d58c97fda06",
+        "type": "json",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 1130,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "34dec0ab92b94ab4",
+        "type": "comment",
+        "z": "ac66284f6b831c50",
+        "g": "38d7b845618d2da3",
+        "name": "UART interface Documentation",
+        "info": "# UART Interface worker\n\n__Version__: ****1.0.0****.\n\n__Author__: ****Volodymyr Noha (SignalIO)****\n\n__General description__:\n\nThis block provide access to the Node-RED UART interface.\nThis interfcae can be used for physical device connection via USB-UART interfcace (this can be useful in case if fast data exchange between app and device is required).\nOriginaly this worker was desiged to work with PSK-device (IoT power supply), so It is not fully-universal solution. It`s limitations can be fixed by adding custom data send/receive protocol.\nThis worker was designed to work with JSON messages only!. To be able to send 'raw' data it should be modified (STX & ETX chars should be removed from the configuration).\n\nGeneral settings:\n - default port: /dev/ttyACM0;\n - default speed: 115200 baud;\n - parity: None;\n - stop bit: 1;\n - bits: 8;\n - hardware transmition control (DTR, RTS, CTS, DSR): disabled\n\nBlock access ports:\n - uart_data_port      ->(input)    - this port allows to transmit payload data to the physical devide. Payload should be string data (in case of input data there is no 'JSON-only' restriction);\n - uart_data_port      (output)->   - this port allows to receive payload data from the physical device. Received payload can be only stringify JSON (in current interface implementation it is not recomended to use the 'newline' control character (\\n) on the device side, during message building. It may cause loss of data, because the UART interface worker using 'newline' as ETX (end-of-text) character);\n - uart_status_port    (output)->   - status port provide current status of the Node-RED UART interface. It provides the status in the JSON format: '{\"uart_status\": \"status\"}';\n - uart_exception_port (output)->   - exception port can be used to check for the exceptions during the Node-RED UART interface execution. It provides the exception message (If occures) in the JSON format: '{\"uart_exception\": \"exception\"}'.\n\n For additional information about Node-RED UART interface the Node-RED documentation can be used.",
+        "x": 850,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "38d7b845618d2da3",
+        "type": "group",
+        "z": "ac66284f6b831c50",
+        "name": "UART interface worker",
+        "style": {
+            "fill": "#dbcbe7",
+            "label": true,
+            "color": "#000000"
+        },
+        "nodes": [
+            "215b1bd6a9d1b2ac",
+            "42d15ccbdfec3a4c",
+            "07dd6c812cadf05f",
+            "2928c88cac7b2c87",
+            "3e5cc5a6420632de",
+            "a0e971d5c5d5a614",
+            "a7ebfa0cec1e73da",
+            "485b0d58c97fda06",
+            "34dec0ab92b94ab4"
+        ],
+        "x": 694,
+        "y": 419,
+        "w": 512,
+        "h": 202
+    },
+    {
+        "id": "290cf16cc8a25136",
+        "type": "serial-port",
+        "serialport": "/dev/ttyACM0",
+        "serialbaud": "115200",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "{",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "}",
+        "bin": "bin",
+        "out": "char",
+        "addchar": "\\n",
+        "responsetimeout": "1000"
+    },
+    {
+        "id": "4fe7f76c667c17fa",
+        "type": "tab",
+        "label": "Arduiono_Profiler",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "7086ad020c916ee6",
+        "type": "group",
+        "z": "4fe7f76c667c17fa",
+        "name": "Profiler Flow",
+        "style": {
+            "label": true,
+            "color": "#777777",
+            "fill": "#bfdbef",
+            "fill-opacity": "0.21"
+        },
+        "nodes": [
+            "f86f5fec6b0f516d",
+            "5594da37e60c6d97",
+            "526502472db85ebf",
+            "25810eaf4c69213b",
+            "128dd08e6a7ecc11",
+            "a32852554922f3b0",
+            "aab77519063031a1",
+            "7257ac3394a6334c",
+            "ea76a921759acde1",
+            "7b71c930ba774cd5",
+            "25fdb97aad14d537",
+            "1c512829ce44b12c",
+            "4751db67e151b74c",
+            "9ec49c7d1a3581e8",
+            "9f8a3266135dfadf",
+            "1aafa35e4da18a17",
+            "ca2c265e4cc30844",
+            "d1ba4cf617066f78",
+            "2fe330811b3e059c",
+            "ae884a25f7f116cc"
+        ],
+        "x": 154,
+        "y": 279,
+        "w": 1432,
+        "h": 602
+    },
+    {
+        "id": "f86f5fec6b0f516d",
+        "type": "function",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "ProfilerDataToChart()",
+        "func": "var msg_profiler_ram_free = {};\nvar msg_profiler_ram_usage = {};\nvar msg_profiler_block_free = {};\nvar msg_profiler_block_usage = {};\n\nmsg_profiler_ram_free.payload = msg.payload.free_ram;\nmsg_profiler_ram_free.topic = 'RAM free (bytes)';\n\nmsg_profiler_ram_usage.payload = msg.payload.ram_usage;\nmsg_profiler_ram_usage.topic = 'RAM usage (bytes)';\n\nmsg_profiler_block_free.payload = msg.payload.free_block;\nmsg_profiler_block_free.topic = 'RAM block free (bytes)';\n\nmsg_profiler_block_usage.payload = msg.payload.block_usage;\nmsg_profiler_block_usage.topic = 'RAM block usage (bytes)';\n\n\nreturn [msg_profiler_ram_free, msg_profiler_ram_usage, msg_profiler_block_free, msg_profiler_block_usage];\n",
+        "outputs": 4,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 740,
+        "wires": [
+            [
+                "9f8a3266135dfadf"
+            ],
+            [
+                "9f8a3266135dfadf"
+            ],
+            [
+                "9f8a3266135dfadf"
+            ],
+            [
+                "9f8a3266135dfadf"
+            ]
+        ]
+    },
+    {
+        "id": "5594da37e60c6d97",
+        "type": "ui_digital_clock",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "Digital Clock [CLOCK][UI]",
+        "group": "5cff2520c4bb11d8",
+        "order": 2,
+        "width": "16",
+        "height": "1",
+        "x": 810,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "526502472db85ebf",
+        "type": "inject",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "Time",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 440,
+        "wires": [
+            [
+                "5594da37e60c6d97"
+            ]
+        ]
+    },
+    {
+        "id": "25810eaf4c69213b",
+        "type": "subflow:ac66284f6b831c50",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "",
+        "x": 260,
+        "y": 520,
+        "wires": [
+            [
+                "4751db67e151b74c"
+            ],
+            [
+                "1c512829ce44b12c"
+            ],
+            [
+                "128dd08e6a7ecc11"
+            ]
+        ]
+    },
+    {
+        "id": "128dd08e6a7ecc11",
+        "type": "link out",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "profiler_out->",
+        "mode": "link",
+        "links": [
+            "a32852554922f3b0"
+        ],
+        "x": 395,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "a32852554922f3b0",
+        "type": "link in",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "->profiler_in",
+        "links": [
+            "128dd08e6a7ecc11"
+        ],
+        "x": 455,
+        "y": 640,
+        "wires": [
+            [
+                "aab77519063031a1"
+            ]
+        ]
+    },
+    {
+        "id": "aab77519063031a1",
+        "type": "json",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "profiler data",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 560,
+        "y": 640,
+        "wires": [
+            [
+                "7257ac3394a6334c",
+                "ea76a921759acde1",
+                "7b71c930ba774cd5",
+                "25fdb97aad14d537",
+                "f86f5fec6b0f516d"
+            ]
+        ]
+    },
+    {
+        "id": "7257ac3394a6334c",
+        "type": "ui_artlessgauge",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "group": "5cff2520c4bb11d8",
+        "order": 3,
+        "width": "4",
+        "height": "4",
+        "name": "RAM usage [GAUGE][UI]",
+        "icon": "mi-memory",
+        "label": "RAM usage",
+        "unit": "bytes",
+        "layout": "radial",
+        "decimals": 0,
+        "differential": false,
+        "minmax": false,
+        "colorTrack": "#555555",
+        "style": "2,2",
+        "colorFromTheme": true,
+        "property": "payload.ram_usage",
+        "secondary": "secondary",
+        "inline": false,
+        "animate": true,
+        "sectors": [
+            {
+                "val": 0,
+                "col": "#00ff2a",
+                "t": "min",
+                "dot": 0
+            },
+            {
+                "val": 1200,
+                "col": "#ffa200",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2000,
+                "col": "#ff0019",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2560,
+                "col": "#ff0019",
+                "t": "max",
+                "dot": 0
+            }
+        ],
+        "lineWidth": "7",
+        "bgcolorFromTheme": true,
+        "diffCenter": "",
+        "x": 810,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "ea76a921759acde1",
+        "type": "ui_artlessgauge",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "group": "5cff2520c4bb11d8",
+        "order": 4,
+        "width": "4",
+        "height": "4",
+        "name": "RAM free [GAUGE][UI]",
+        "icon": "mi-memory",
+        "label": "RAM free",
+        "unit": "bytes",
+        "layout": "radial",
+        "decimals": 0,
+        "differential": false,
+        "minmax": false,
+        "colorTrack": "#555555",
+        "style": "2,2",
+        "colorFromTheme": true,
+        "property": "payload.free_ram",
+        "secondary": "secondary",
+        "inline": false,
+        "animate": true,
+        "sectors": [
+            {
+                "val": 0,
+                "col": "#00ff2a",
+                "t": "min",
+                "dot": 0
+            },
+            {
+                "val": 1200,
+                "col": "#ffa200",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2000,
+                "col": "#ff0019",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2560,
+                "col": "#ff0019",
+                "t": "max",
+                "dot": 0
+            }
+        ],
+        "lineWidth": "7",
+        "bgcolorFromTheme": true,
+        "diffCenter": "",
+        "x": 800,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "7b71c930ba774cd5",
+        "type": "ui_artlessgauge",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "group": "5cff2520c4bb11d8",
+        "order": 5,
+        "width": "4",
+        "height": "4",
+        "name": "RAM Block usage [GAUGE][UI]",
+        "icon": "mi-memory",
+        "label": "RAM Block usage",
+        "unit": "bytes",
+        "layout": "radial",
+        "decimals": 0,
+        "differential": false,
+        "minmax": false,
+        "colorTrack": "#555555",
+        "style": "2,2",
+        "colorFromTheme": true,
+        "property": "payload.block_usage",
+        "secondary": "secondary",
+        "inline": false,
+        "animate": true,
+        "sectors": [
+            {
+                "val": 0,
+                "col": "#00ff2a",
+                "t": "min",
+                "dot": 0
+            },
+            {
+                "val": 1200,
+                "col": "#ffa200",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2000,
+                "col": "#ff0019",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2560,
+                "col": "#ff0019",
+                "t": "max",
+                "dot": 0
+            }
+        ],
+        "lineWidth": "7",
+        "bgcolorFromTheme": true,
+        "diffCenter": "",
+        "x": 830,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "25fdb97aad14d537",
+        "type": "ui_artlessgauge",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "group": "5cff2520c4bb11d8",
+        "order": 6,
+        "width": "4",
+        "height": "4",
+        "name": "RAM Block free [GAUGE][UI]",
+        "icon": "mi-memory",
+        "label": "RAM Block free",
+        "unit": "bytes",
+        "layout": "radial",
+        "decimals": 0,
+        "differential": false,
+        "minmax": false,
+        "colorTrack": "#555555",
+        "style": "2,2",
+        "colorFromTheme": true,
+        "property": "payload.free_block",
+        "secondary": "secondary",
+        "inline": false,
+        "animate": true,
+        "sectors": [
+            {
+                "val": 0,
+                "col": "#00ff2a",
+                "t": "min",
+                "dot": 0
+            },
+            {
+                "val": 1200,
+                "col": "#ffa200",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2000,
+                "col": "#ff0019",
+                "t": "sec",
+                "dot": 0
+            },
+            {
+                "val": 2560,
+                "col": "#ff0019",
+                "t": "max",
+                "dot": 0
+            }
+        ],
+        "lineWidth": "7",
+        "bgcolorFromTheme": true,
+        "diffCenter": "",
+        "x": 820,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "1c512829ce44b12c",
+        "type": "link out",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "profiler_exception_out->",
+        "mode": "link",
+        "links": [
+            "2372a8ff5186fe79"
+        ],
+        "x": 395,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "4751db67e151b74c",
+        "type": "link out",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "profiler_status_out->",
+        "mode": "link",
+        "links": [
+            "1c4016e8aa65e48e"
+        ],
+        "x": 395,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "9ec49c7d1a3581e8",
+        "type": "ui_text",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "group": "5cff2520c4bb11d8",
+        "order": 1,
+        "width": "16",
+        "height": "1",
+        "name": "Profiler title [TEXT][UI]",
+        "label": "<b>Arduino Profiler Application</b>",
+        "format": "",
+        "layout": "col-center",
+        "className": "",
+        "x": 820,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "9f8a3266135dfadf",
+        "type": "ui_chart",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "Profiler chart [CHART][UI]",
+        "group": "5cff2520c4bb11d8",
+        "order": 6,
+        "width": "16",
+        "height": "7",
+        "label": "Profiler chart",
+        "chartType": "bar",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1070,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1aafa35e4da18a17",
+        "type": "ui_text",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "group": "5cff2520c4bb11d8",
+        "order": 7,
+        "width": "13",
+        "height": "1",
+        "name": "Show info window [TEXT][UI]",
+        "label": "<b>Show info window: </b>",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 820,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "ca2c265e4cc30844",
+        "type": "ui_button",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "Show info window [BUTTON][UI]",
+        "group": "5cff2520c4bb11d8",
+        "order": 37,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Show Info",
+        "tooltip": "",
+        "color": "white",
+        "bgcolor": "purple",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 830,
+        "y": 840,
+        "wires": [
+            [
+                "d1ba4cf617066f78"
+            ]
+        ]
+    },
+    {
+        "id": "d1ba4cf617066f78",
+        "type": "change",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "set info message payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Arduino profiler web application Version: 1.0.0",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1090,
+        "y": 840,
+        "wires": [
+            [
+                "2fe330811b3e059c"
+            ]
+        ]
+    },
+    {
+        "id": "2fe330811b3e059c",
+        "type": "ui_toast",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "Profiler Info",
+        "name": "Show Info notification [NOTIFICATION][UI]",
+        "x": 1390,
+        "y": 840,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ae884a25f7f116cc",
+        "type": "comment",
+        "z": "4fe7f76c667c17fa",
+        "g": "7086ad020c916ee6",
+        "name": "Flow Description",
+        "info": "# Arduino Profiler\n\nSimple profiler for Arduino applications, based on Node-RED and ArduinoProfiler + ArduinoJson libs.\nProfiler receives JSON data from target device from UART interface. The data contains:\n\n- RAM usage in bytes;\n- Free RAM in bytes;\n- RAM block usage in bytes;\n- Free RAM block in bytes.\n\n",
+        "x": 260,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "5cff2520c4bb11d8",
+        "type": "ui_group",
+        "name": "Profiler",
+        "tab": "5c4bda75fad26b8a",
+        "order": 1,
+        "disp": true,
+        "width": "16",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "5c4bda75fad26b8a",
+        "type": "ui_tab",
+        "name": "Profiler Dashboard",
+        "icon": "dashboard",
+        "order": 6,
+        "disabled": false,
+        "hidden": false
+    }
+]

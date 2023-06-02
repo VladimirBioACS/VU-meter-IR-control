@@ -41,7 +41,6 @@
 #endif
 
 #include "main.h"
-
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
@@ -85,6 +84,14 @@ X9C102_potentiometer potentiometer(UD_POTENTIOMETER_GPIO, INC_POTENTIOMETER_GPIO
 
 EEPROMStore<ChannelsConfiguration> Configuration;
 
+#if(ARDUINO_PROFILER == STD_ON && DEBUG_PRINTER == STD_ON)
+
+#include "Profiler.h"
+#include "ArduinoJson-v6.19.4.h"
+
+Profiler profiler;
+
+#endif
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
@@ -500,6 +507,7 @@ void setup()
 #endif
 
   potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
+
 }
 
 /**
@@ -518,6 +526,20 @@ void loop()
     irReceiveCmdInfo();
 #else
     irDataReceive();
+#endif
+
+#if(ARDUINO_PROFILER == STD_ON && DEBUG_PRINTER == STD_ON)
+
+  StaticJsonDocument<32> doc;
+
+  doc["ram_usage"] = profiler.getRAMUsage();
+  doc["block_usage"] = profiler.getBlockUsage();
+  doc["free_block"] = profiler.getFreeBlock();
+  doc["free_ram"] = profiler.getFreeRAM();
+
+  serializeJson(doc, Serial);
+  DEBUG_NL(" ");
+
 #endif
 
     old_tim_value = millis();

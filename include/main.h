@@ -46,6 +46,7 @@
 #define AVR_WDT_ENABLE                      (STD_ON)
 #define INIT_POTENTIOMETERS_WITH_EEPROM_VAL (STD_ON)
 #define EEPROM_CHECK_TASK_ENABLE            (STD_ON)
+#define ARDUINO_PROFILER                    (STD_ON)
 
 #define POTENTIOMETER_LOW_BOUNDRY           (uint8_t)(1)   /* 3 KOhm */
 #define POTENTIOMETER_HIGH_BOUNDRY          (uint8_t)(10) /*30 KOhm with step of 3 KOhm*/
