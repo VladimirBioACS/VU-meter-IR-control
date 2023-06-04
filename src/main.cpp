@@ -5,8 +5,9 @@
   \ \/ / | |  | |______| |\/| |  __|    | |  |  __| |  _  /
    \  /  | |__| |      | |  | | |____   | |  | |____| | \ \
     \/    \____/       |_|  |_|______|  |_|  |______|_|  \_\
+
 **********************************************************************************************************************
-*    @file           : main.c
+*    @file           : main.cpp
 *    @brief          : main program body
 **********************************************************************************************************************
 *    @author     Volodymyr Noha
@@ -92,6 +93,7 @@ EEPROMStore<ChannelsConfiguration> Configuration;
 Profiler profiler;
 
 #endif
+
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
@@ -144,6 +146,10 @@ static void showSystemInfo(void)
   DEBUG(RAM_VOLUME);
   DEBUG_NL(" bytes");
 
+  DEBUG("[POTENTIOMETER RESOLUTION]");
+  DEBUG(POTENTIOMETER_RESOLUTION);
+  DEBUG_NL(" KOhm");
+
   DEBUG("[POTENTIOMETER MAX RESISTANCE]: ");
   DEBUG(MAX_RESISTANCE);
   DEBUG_NL(" KOhm");
@@ -170,14 +176,20 @@ static void showSystemInfo(void)
   DEBUG_NL("[OPTION]: Potentiometer initialization from EEPROM: [ENABLED]");
 
   DEBUG("[OPTION]: Current EEPROM value for Left channel: ");
-  DEBUG_NL(Configuration.Data.channel_left_resistance_value);
+  DEBUG_NL(Configuration.Data.channel_left_step_value);
 
   DEBUG("[OPTION]: Current EEPROM value for Right channel: ");
-  DEBUG_NL(Configuration.Data.channel_right_resistance_value);
+  DEBUG_NL(Configuration.Data.channel_right_step_value);
 #endif
 
-  DEBUG_NL("=====PLATFORM INFO START=====");
-  DEBUG_NL("");
+#if (EEPROM_CHECK_TASK_ENABLE == STD_ON)
+  DEBUG_NL("[OPTION]: EEPROM memory check task: [ENABLED]");
+#endif
+
+#if (ARDUINO_PROFILER == STD_ON)
+  DEBUG_NL("[OPTION]: Arduino profiler: [ENABLED]");
+#endif
+
 }
 
 #endif
@@ -190,8 +202,7 @@ static void showSystemInfo(void)
  */
 static void irReceiveCmdInfo()
 {
-  if (irreciver.decode())
-  {
+  if (irreciver.decode()) {
     DEBUG_NL("Basic info:");
     irreciver.printIRResultMinimal(&Serial);
     DEBUG_NL();
@@ -202,6 +213,7 @@ static void irReceiveCmdInfo()
     irreciver.printIRResultAsCVariables(&Serial);
     DEBUG_NL();
   }
+
   irreciver.resume();
 }
 #endif
@@ -213,8 +225,8 @@ static void irReceiveCmdInfo()
  */
 static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_value)
 {
-  Configuration.Data.channel_left_resistance_value = left_channel_value;
-  Configuration.Data.channel_right_resistance_value = right_channel_value;
+  Configuration.Data.channel_left_step_value = left_channel_value;
+  Configuration.Data.channel_right_step_value = right_channel_value;
 
   bool eeprom_status_f = Configuration.Save();
 
@@ -228,8 +240,7 @@ static bool storeEepromConfig(uint8_t left_channel_value, uint8_t right_channel_
  */
 static void potentiometerChannelSelect(int option)
 {
-  switch (option)
-  {
+  switch (option) {
   case LEFT_CHANNEL_SELECT:
     CSportSet(LEFT_CHANNEL_SELECT);
     break;
@@ -258,31 +269,28 @@ static void potentiometerChannelSelect(int option)
  */
 static void irDataReceive(void)
 {
-  static uint8_t right_channel_value = Configuration.Data.channel_right_resistance_value;
-  static uint8_t left_channel_value = Configuration.Data.channel_left_resistance_value;
-
+  static uint8_t left_channel_value = Configuration.Data.channel_left_step_value;
+  static uint8_t right_channel_value = Configuration.Data.channel_right_step_value;
   static uint8_t channel_select_f = CHANNEL_SELECTION_IDLE_F;
 
   /* should be tested */
-  if (right_channel_value < POTENTIOMETER_LOW_BOUNDRY)
-  {
+  if (right_channel_value < POTENTIOMETER_LOW_BOUNDRY) {
     right_channel_value = POTENTIOMETER_LOW_BOUNDRY;
   }
 
-  if (left_channel_value < POTENTIOMETER_LOW_BOUNDRY)
-  {
+  if (left_channel_value < POTENTIOMETER_LOW_BOUNDRY) {
     left_channel_value = POTENTIOMETER_LOW_BOUNDRY;
   }
 
-  if (irreciver.decode())
-  {
-    if (irreciver.decodedIRData.protocol != UNKNOWN)
-    {
+  if (irreciver.decode()) {
+
+    if (irreciver.decodedIRData.protocol != UNKNOWN) {
       uint32_t received_cmd = irreciver.decodedIRData.decodedRawData;
 
-      switch (received_cmd)
-      {
+      switch (received_cmd) {
+      
       case SELECT_RIGHT_CHANNEL_CMD_RAW:
+        
         DEBUG_NL("[CMD received]: Right channel selected");
 
         channel_select_f = RIGHT_CHANNEL_SELECT_F;
@@ -291,6 +299,7 @@ static void irDataReceive(void)
         break;
 
       case SELECT_LEFT_CHANNEL_CMD_RAW:
+        
         DEBUG_NL("[CMD received]: Left channel selected");
 
         channel_select_f = LEFT_CHANNEL_SELECT_F;
@@ -299,123 +308,124 @@ static void irDataReceive(void)
         break;
 
       case COMMIT_CHANGES_CMD_RAW:
+        
         DEBUG_NL("[CMD received]: Changes commited");
 
         potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
         channel_select_f = CHANNEL_SELECTION_IDLE_F;
 
-        DEBUG_NL("Stored values: ");
-
-        DEBUG("Right channel: ");
-        DEBUG(right_channel_value);
-        DEBUG_NL("");
-
-        DEBUG("Left channel: ");
-        DEBUG(left_channel_value);
-        DEBUG_NL("");
-
-        if (storeEepromConfig(left_channel_value, right_channel_value))
-        {
+        if (storeEepromConfig(left_channel_value, right_channel_value)) {
           DEBUG_NL("Configuration stored in eeprom");
           DEBUG_NL("EEPROM storage content: ");
 
-          DEBUG("Right channel: ");
-          DEBUG(Configuration.Data.channel_right_resistance_value);
+          DEBUG("Left channel step value: ");
+          DEBUG(Configuration.Data.channel_left_step_value);
           DEBUG_NL("");
 
-          DEBUG("Left channel: ");
-          DEBUG(Configuration.Data.channel_left_resistance_value);
+          DEBUG("Right channel step value: ");
+          DEBUG(Configuration.Data.channel_right_step_value);
           DEBUG_NL("");
         }
 
-        else
-        {
+        else {
           DEBUG_NL("EEPROM data did not changed");
         }
 
         break;
 
-      case INCREASE_POTENTIOMETER_VAL_CMD_RAW:
-        DEBUG_NL("[CMD received]: value UP");
+      case INCREASE_VU_VALUE_CMD_RAW:
+        
+        DEBUG_NL("[CMD received]: VU value UP");
 
-        if (channel_select_f == LEFT_CHANNEL_SELECT_F)
-        {
-          ++left_channel_value;
+        if (channel_select_f == LEFT_CHANNEL_SELECT_F) {
+          --left_channel_value;                         /* Decrease left channel potentiometer value to increase the left channel signal magnitude */
 
-          if (left_channel_value <= POTENTIOMETER_HIGH_BOUNDRY)
-          {
+          if (left_channel_value >= POTENTIOMETER_LOW_BOUNDRY) {
             potentiometer.potentiometerSetVal(left_channel_value, DIRECTION_DOWN);
             DEBUG_NL(left_channel_value);
           }
 
-          else
-          {
-            left_channel_value = POTENTIOMETER_HIGH_BOUNDRY;
-          }
-        }
-
-        if (channel_select_f == RIGHT_CHANNEL_SELECT_F)
-        {
-          ++right_channel_value;
-
-          if (right_channel_value <= POTENTIOMETER_HIGH_BOUNDRY)
-          {
-            potentiometer.potentiometerSetVal(right_channel_value, DIRECTION_UP);
-            DEBUG_NL(right_channel_value);
-          }
-
-          else
-          {
-            right_channel_value = POTENTIOMETER_HIGH_BOUNDRY;
-          }
-        }
-        else
-        {
-          // empty
-        }
-
-        break;
-
-      case DECREASE_POTENTIOMETER_VAL_CMD_RAW:
-        DEBUG_NL("[CMD received]: value DOWN");
-
-        if (channel_select_f == LEFT_CHANNEL_SELECT_F)
-        {
-          --left_channel_value;
-
-          if (left_channel_value >= POTENTIOMETER_LOW_BOUNDRY)
-          {
-            potentiometer.potentiometerSetVal(left_channel_value, DIRECTION_DOWN);
-            DEBUG_NL(left_channel_value);
-          }
-
-          else
-          {
+          else {
             left_channel_value = POTENTIOMETER_LOW_BOUNDRY;
           }
         }
 
-        if (channel_select_f == RIGHT_CHANNEL_SELECT_F)
-        {
-          --right_channel_value;
+        if (channel_select_f == RIGHT_CHANNEL_SELECT_F) {
+          --right_channel_value;                        /* Decrease right channel potentiometer value to increase the right channel signal magnitude */
 
-          if (right_channel_value >= POTENTIOMETER_LOW_BOUNDRY)
-          {
+          if (right_channel_value >= POTENTIOMETER_LOW_BOUNDRY) {
             potentiometer.potentiometerSetVal(right_channel_value, DIRECTION_UP);
             DEBUG_NL(right_channel_value);
-          }
-
-          else
-          {
+          } else {
             right_channel_value = POTENTIOMETER_LOW_BOUNDRY;
           }
-        }
-        else
-        {
+        } else {
           // empty
         }
 
         break;
+
+      case DECREASE_VU_VALUE_CMD_RAW:
+        
+        DEBUG_NL("[CMD received]: VU value DOWN");
+
+        if (channel_select_f == LEFT_CHANNEL_SELECT_F) {
+          ++left_channel_value;                         /* Increase left channel potentiometer value to decrease the left channel signal magnitude */
+
+          if (left_channel_value <= POTENTIOMETER_HIGH_BOUNDRY) {
+            potentiometer.potentiometerSetVal(left_channel_value, DIRECTION_DOWN);
+            DEBUG_NL(left_channel_value);
+          } else {
+            left_channel_value = POTENTIOMETER_HIGH_BOUNDRY;
+          }
+        }
+
+        if (channel_select_f == RIGHT_CHANNEL_SELECT_F) {
+          ++right_channel_value;                        /* Increase right channel potentiometer value to decrease the right channel signal magnitude */
+
+          if (right_channel_value <= POTENTIOMETER_HIGH_BOUNDRY) {
+            potentiometer.potentiometerSetVal(right_channel_value, DIRECTION_UP);
+            DEBUG_NL(right_channel_value);
+          } else {
+            right_channel_value = POTENTIOMETER_HIGH_BOUNDRY;
+          }
+        } else {
+          // empty
+        }
+
+        break;
+
+      case FACTORY_RESET_VU_VAL_CMD_RAW:
+
+        potentiometerChannelSelect(RIGHT_CHANNEL_SELECT);
+        right_channel_value = POTETNIOMETER_RESET_VALUE;
+        potentiometer.potentiometerSetVal(right_channel_value, DIRECTION_UP);
+
+        potentiometerChannelSelect(LEFT_CHANNEL_SELECT);
+        left_channel_value = POTETNIOMETER_RESET_VALUE;
+        potentiometer.potentiometerSetVal(left_channel_value, DIRECTION_DOWN);
+
+        potentiometerChannelSelect(RELEASE_CHANNELS_CS_LINES);
+
+        if (storeEepromConfig(left_channel_value, right_channel_value)) {
+          DEBUG_NL("Factory reset potentiometer values");
+          DEBUG_NL("EEPROM storage content: ");
+
+          DEBUG("Left channel step value: ");
+          DEBUG(Configuration.Data.channel_left_step_value);
+          DEBUG_NL("");
+
+          DEBUG("Right channel step value: ");
+          DEBUG(Configuration.Data.channel_right_step_value);
+          DEBUG_NL("");
+
+        } else {
+          DEBUG_NL("EEPROM Factory reset");
+          DEBUG_NL("EEPROM data did not changed");
+        }
+
+        break;
+
 
 /*Debug info*/
 #if (DEBUG_PRINTER == STD_ON || SOFTWARE_SERIAL_DEBUG == STD_ON)
@@ -428,10 +438,7 @@ static void irDataReceive(void)
         DEBUG_NL("[CMD received]: Unknown command");
         break;
       }
-    }
-
-    else
-    {
+    } else {
       DEBUG_NL("Unknown protocol");
     }
   }
@@ -445,25 +452,21 @@ static void irDataReceive(void)
 #if(EEPROM_CHECK_TASK_ENABLE == STD_ON)
   static uint32_t old_time_eeprom_check_value = millis();
 
-  if ((millis() - old_time_eeprom_check_value) > DELAY_EEPROM_CHECK) /* Timer for non-blocking delay */
-  {
-    if (storeEepromConfig(left_channel_value, right_channel_value))
-    {
+  if ((millis() - old_time_eeprom_check_value) > DELAY_EEPROM_CHECK) {          /* Timer for non-blocking delay */
+    if (storeEepromConfig(left_channel_value, right_channel_value)) {
       DEBUG_NL("EEPROM Check task");
       DEBUG_NL("EEPROM stored");
       DEBUG_NL("EEPROM storage content: ");
 
-      DEBUG("Right channel value: ");
-      DEBUG(Configuration.Data.channel_right_resistance_value);
+      DEBUG("Left channel step value: ");
+      DEBUG(Configuration.Data.channel_left_step_value);
       DEBUG_NL("");
 
-      DEBUG("Left channel value: ");
-      DEBUG(Configuration.Data.channel_left_resistance_value);
+      DEBUG("Right channel step value: ");
+      DEBUG(Configuration.Data.channel_right_step_value);
       DEBUG_NL("");
-    }
 
-    else
-    {
+    } else {
       DEBUG_NL("EEPROM Check task");
       DEBUG_NL("EEPROM data did not changed");
     }
@@ -499,10 +502,10 @@ void setup()
 #if (INIT_POTENTIOMETERS_WITH_EEPROM_VAL == STD_ON)
 
   potentiometerChannelSelect(LEFT_CHANNEL_SELECT);
-  potentiometer.potentiometerSetVal(Configuration.Data.channel_left_resistance_value, DIRECTION_DOWN);
+  potentiometer.potentiometerSetVal(Configuration.Data.channel_left_step_value, DIRECTION_DOWN);
 
   potentiometerChannelSelect(RIGHT_CHANNEL_SELECT);
-  potentiometer.potentiometerSetVal(Configuration.Data.channel_right_resistance_value, DIRECTION_UP);
+  potentiometer.potentiometerSetVal(Configuration.Data.channel_right_step_value, DIRECTION_UP);
 
 #endif
 
@@ -520,8 +523,8 @@ void loop()
   /* Main loop */
   static uint32_t old_tim_value = millis();
 
-  if ((millis() - old_tim_value) > DELAY_PERIOD) /* Timer for non-blocking delay */
-  {
+  if ((millis() - old_tim_value) > DELAY_PERIOD) {   /* Timer for non-blocking delay */
+
 #if (DEBUG_PRINTER == STD_ON && DEBUG_IR_FULL_INFO == STD_ON)
     irReceiveCmdInfo();
 #else
