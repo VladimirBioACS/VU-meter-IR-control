@@ -47,6 +47,9 @@ typedef enum
 /*********************************************************************************************************************/
 /*------------------------------------------------------Classes------------------------------------------------------*/
 /*********************************************************************************************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 class X9C102_potentiometer 
 {
@@ -65,5 +68,9 @@ public:
     void potentiometerSetVal(uint8_t val, potentiometer_direction dir);
     void setValueLeftChannel(uint8_t val);
 };
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif
