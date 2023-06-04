@@ -1,3 +1,21 @@
+/**
+**********************************************************************************************************************
+*    @file           : platform.h
+*    @brief          : platform.h header file body
+**********************************************************************************************************************
+*    @author     Volodymyr Noha
+*    @license    MIT (see License.txt)
+*
+*    @description:
+*    This header file contains platform specific information
+*
+*    @section  HISTORY
+*    v1.0  - First version
+*
+**********************************************************************************************************************
+*/
+
+
 #ifndef PLATFORM_H_
 #define PLATFORM_H_
 
